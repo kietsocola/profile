@@ -1,26 +1,926 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Homepage</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        header { background: #333; color: #fff; padding: 10px; text-align: center; }
-        main { padding: 20px; }
-        footer { text-align: center; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Van Tuan Kiet — Backend Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── RESET & VARIABLES ─────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg          : #07111f;
+      --bg-2        : #0c1a2e;
+      --blue        : #3b82f6;
+      --blue-dim    : #1d4ed8;
+      --blue-glow   : rgba(59,130,246,0.18);
+      --blue-border : rgba(59,130,246,0.35);
+      --glass-bg    : rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+      --text        : #dde6f0;
+      --muted       : #7a90a8;
+      --font-mono   : 'JetBrains Mono', monospace;
+      --font-sans   : 'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      /* subtle grid pattern — no gradient */
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    ::selection { background: var(--blue-glow); color: #fff; }
+
+    /* ── SCROLLBAR ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+
+    /* ── NAV ───────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 999;
+      padding: .9rem 3rem;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(7,17,31,.85);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--glass-border);
+      transition: box-shadow .3s;
+    }
+    nav.scrolled { box-shadow: 0 4px 40px rgba(0,0,0,.4); }
+
+    .logo {
+      font-family: var(--font-mono);
+      font-size: 1rem; color: var(--blue); letter-spacing: .02em;
+    }
+    .logo span { color: var(--text); }
+
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links a {
+      text-decoration: none; font-size: .85rem; color: var(--muted);
+      position: relative; transition: color .2s;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -3px; left: 0;
+      width: 0; height: 1.5px; background: var(--blue); transition: width .3s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+    .nav-links a.active { color: var(--text); }
+
+    .nav-resume {
+      padding: .4rem 1rem;
+      border: 1px solid var(--blue); border-radius: 6px;
+      color: var(--blue); font-size: .82rem; text-decoration: none;
+      transition: background .2s;
+    }
+    .nav-resume:hover { background: var(--blue-glow); }
+
+    /* ── HERO ──────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 7rem 3rem 4rem;
+    }
+
+    .hero-inner {
+      display: grid; grid-template-columns: 1fr 1.1fr; gap: 5rem;
+      align-items: center; max-width: 1200px; width: 100%;
+    }
+
+    .hero-text .greeting {
+      font-family: var(--font-mono); font-size: .9rem;
+      color: var(--blue); margin-bottom: .8rem; letter-spacing: .04em;
+    }
+    .hero-text h1 {
+      font-size: 3.4rem; font-weight: 700; line-height: 1.1;
+      letter-spacing: -.01em; margin-bottom: .9rem;
+    }
+    .hero-text h1 .hi { color: var(--blue); }
+
+    .hero-text .subtitle {
+      font-family: var(--font-mono); font-size: 1.05rem; color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .hero-text .subtitle::before { content: '// '; color: var(--blue); }
+
+    .hero-text p {
+      color: var(--muted); line-height: 1.85; font-size: .97rem;
+      max-width: 420px; margin-bottom: 2.25rem;
+    }
+
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .btn-solid {
+      padding: .72rem 1.7rem; background: var(--blue); color: #fff;
+      border: none; border-radius: 8px; font-size: .9rem; font-weight: 500;
+      cursor: pointer; text-decoration: none; transition: all .2s;
+      display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .btn-solid:hover { background: var(--blue-dim); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,.3); }
+
+    .btn-ghost {
+      padding: .72rem 1.7rem; background: transparent; color: var(--blue);
+      border: 1px solid var(--blue); border-radius: 8px; font-size: .9rem;
+      font-weight: 500; text-decoration: none; transition: all .2s;
+      display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .btn-ghost:hover { background: var(--blue-glow); transform: translateY(-2px); }
+
+    /* ── MACBOOK WINDOW ────────────────────────────────────── */
+    .mac-window {
+      border-radius: 14px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(8,18,35,.95);
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 40px 90px rgba(0,0,0,.55),
+        0 0 0 1px rgba(255,255,255,.04),
+        inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    /* Title bar */
+    .mac-titlebar {
+      padding: 10px 14px;
+      background: rgba(255,255,255,.045);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dots { display: flex; gap: 6px; }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%; cursor: default;
+      transition: opacity .2s;
+    }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .mac-titlebar:hover .dot { opacity: .85; }
+
+    .mac-tabbar {
+      display: flex; gap: 1px; margin-left: 14px; overflow: hidden;
+    }
+    .mac-tab {
+      padding: 3px 14px; font-family: var(--font-mono); font-size: .72rem;
+      border-radius: 5px 5px 0 0; cursor: pointer;
+      border: 1px solid transparent; border-bottom: none;
+      color: var(--muted); background: transparent;
+      transition: all .2s;
+    }
+    .mac-tab.on {
+      background: rgba(59,130,246,.12);
+      border-color: rgba(59,130,246,.25);
+      color: #93c5fd;
+    }
+
+    /* Sidebar */
+    .mac-body { display: flex; }
+
+    .mac-sidebar {
+      width: 52px; background: rgba(255,255,255,.025);
+      border-right: 1px solid rgba(255,255,255,.06);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 14px 0; gap: 18px;
+    }
+    .sb-icon {
+      width: 22px; height: 22px; opacity: .3;
+      transition: opacity .2s; cursor: pointer;
+    }
+    .sb-icon:hover, .sb-icon.on { opacity: .9; }
+    .sb-icon svg { fill: var(--muted); }
+    .sb-icon.on svg { fill: var(--blue); }
+
+    /* Editor area */
+    .mac-editor {
+      flex: 1; padding: 1.2rem 1.4rem;
+      font-family: var(--font-mono); font-size: .8rem; line-height: 1.75;
+      min-height: 310px; overflow: hidden;
+    }
+    .code-line { display: flex; gap: 1.2rem; }
+    .ln { color: rgba(148,163,184,.2); min-width: 18px; text-align: right; user-select: none; }
+    .cc { flex: 1; }
+
+    /* Syntax colours */
+    .kw  { color: #c792ea; }   /* keyword */
+    .tp  { color: #ffcb6b; }   /* type / class */
+    .fn  { color: #82aaff; }   /* function */
+    .str { color: #c3e88d; }   /* string */
+    .num { color: #f78c6c; }   /* number */
+    .ann { color: #f07178; }   /* annotation */
+    .cm  { color: #4a6077; }   /* comment */
+    .op  { color: #89ddff; }   /* operator / punctuation */
+    .va  { color: #e2e8f0; }   /* variable */
+
+    .cursor {
+      display: inline-block; width: 2px; height: .9em;
+      background: var(--blue); vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Status bar */
+    .mac-statusbar {
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 4px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font-mono); font-size: .67rem; color: var(--muted);
+      background: rgba(255,255,255,.025);
+    }
+    .status-left { display: flex; gap: 1rem; align-items: center; }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--blue); box-shadow: 0 0 6px var(--blue);
+      display: inline-block;
+    }
+
+    /* ── SHARED SECTION STYLES ─────────────────────────────── */
+    section { padding: 6rem 3rem; position: relative; }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .sec-head { display: flex; align-items: center; gap: .9rem; margin-bottom: .6rem; }
+    .sec-num { font-family: var(--font-mono); font-size: .85rem; color: var(--blue); }
+    .sec-title { font-size: 1.75rem; font-weight: 700; }
+    .sec-line { height: 1px; background: var(--glass-border); margin-bottom: 3rem; }
+
+    /* scroll-reveal */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .7s; }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .reveal-left { opacity: 0; transform: translateX(-24px); transition: opacity .7s, transform .7s; }
+    .reveal-left.in { opacity: 1; transform: translateX(0); }
+
+    /* glass card base */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      transition: border-color .3s, transform .3s, box-shadow .3s;
+    }
+    .glass:hover {
+      border-color: var(--blue-border);
+      box-shadow: 0 16px 48px rgba(0,0,0,.3);
+    }
+
+    /* ── ABOUT ─────────────────────────────────────────────── */
+    .about-grid {
+      display: grid; grid-template-columns: 1.5fr 1fr; gap: 3.5rem; align-items: start;
+    }
+    .about-text p { color: var(--muted); line-height: 1.9; font-size: .97rem; margin-bottom: 1.2rem; }
+    .about-text strong { color: var(--text); }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat-card {
+      padding: 1.4rem 1rem; text-align: center;
+      cursor: default;
+    }
+    .stat-val {
+      font-family: var(--font-mono); font-size: 1.8rem; font-weight: 700;
+      color: var(--blue); display: block;
+    }
+    .stat-lbl { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+    /* ── SKILLS ────────────────────────────────────────────── */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
+
+    .skill-card { padding: 1.5rem; }
+    .skill-card h3 {
+      font-size: .78rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 1.1rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .tag {
+      padding: .28rem .7rem;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.18);
+      border-radius: 20px; font-size: .77rem;
+      color: #93c5fd; font-family: var(--font-mono);
+      transition: background .2s, border-color .2s;
+      cursor: default;
+    }
+    .tag:hover { background: rgba(59,130,246,.22); border-color: var(--blue); }
+
+    /* ── EXPERIENCE ────────────────────────────────────────── */
+    .timeline { padding-left: 1.8rem; position: relative; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 10px; bottom: 0;
+      width: 1px; background: var(--glass-border);
+    }
+    .t-item { position: relative; margin-bottom: 2.25rem; }
+    .t-dot {
+      position: absolute; left: -2.25rem; top: 10px;
+      width: 11px; height: 11px; border-radius: 50%;
+      background: var(--blue); border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--blue), 0 0 10px var(--blue-glow);
+    }
+    .exp-card { padding: 1.5rem 1.75rem; }
+    .exp-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .35rem; }
+    .exp-role { font-size: 1.05rem; font-weight: 600; }
+    .exp-when { font-family: var(--font-mono); font-size: .75rem; color: var(--blue); white-space: nowrap; }
+    .exp-company { font-size: .88rem; color: var(--muted); margin-bottom: 1rem; }
+    .exp-ul { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+    .exp-ul li {
+      font-size: .88rem; color: var(--muted); padding-left: 1.25rem;
+      position: relative; line-height: 1.7;
+    }
+    .exp-ul li::before { content: '▸'; position: absolute; left: 0; color: var(--blue); }
+    .exp-ul li strong { color: var(--text); }
+    .tech-strip { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .tech-pill {
+      padding: .2rem .6rem;
+      background: rgba(59,130,246,.07);
+      border: 1px solid rgba(59,130,246,.15);
+      border-radius: 4px; font-size: .72rem;
+      color: var(--muted); font-family: var(--font-mono);
+    }
+
+    /* ── PROJECTS ──────────────────────────────────────────── */
+    .proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .proj-card { padding: 1.75rem; position: relative; overflow: hidden; }
+    .proj-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--blue); transform: scaleX(0);
+      transform-origin: left; transition: transform .4s;
+    }
+    .proj-card:hover::before { transform: scaleX(1); }
+
+    .proj-num {
+      font-family: var(--font-mono); font-size: .72rem;
+      color: var(--blue); margin-bottom: .75rem; opacity: .7;
+    }
+    .proj-title { font-size: 1.15rem; font-weight: 600; margin-bottom: .75rem; display: flex; justify-content: space-between; align-items: center; }
+    .proj-link { color: var(--muted); text-decoration: none; font-size: .95rem; transition: color .2s; }
+    .proj-link:hover { color: var(--blue); }
+    .proj-desc { font-size: .88rem; color: var(--muted); line-height: 1.75; margin-bottom: 1.25rem; }
+    .proj-desc strong { color: var(--text); }
+
+    /* ── AWARDS ────────────────────────────────────────────── */
+    .awards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .award-card { padding: 1.5rem; display: flex; gap: 1rem; align-items: flex-start; }
+    .award-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: .1rem; }
+    .award-title { font-size: .95rem; font-weight: 600; margin-bottom: .35rem; }
+    .award-desc { font-size: .82rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── CONTACT ───────────────────────────────────────────── */
+    #contact { text-align: center; }
+    .contact-box { max-width: 580px; margin: 0 auto; padding: 3rem; }
+    .contact-box p { color: var(--muted); line-height: 1.85; margin-bottom: 2rem; font-size: .97rem; }
+    .socials { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.75rem; }
+    .social-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .5rem 1.1rem; border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      color: var(--muted); text-decoration: none; font-size: .85rem;
+      transition: all .2s;
+    }
+    .social-btn:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-glow); }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    footer {
+      text-align: center; padding: 2rem;
+      color: var(--muted); font-size: .78rem;
+      border-top: 1px solid var(--glass-border);
+    }
+    footer span { color: var(--blue); }
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+      .hero-text h1 { font-size: 2.5rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      nav { padding: .8rem 1.5rem; }
+      section { padding: 5rem 1.5rem; }
+    }
+    @media (max-width: 600px) {
+      .mac-window { display: none; }
+      .nav-links { display: none; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Portfolio</h1>
-    </header>
-    <main>
-        <h2>About Me</h2>
-        <p>Details about myself.</p>
-    </main>
-    <footer>
-        <p>&copy; 2026 Your Name</p>
-    </footer>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav id="nav">
+  <div class="logo">kiet<span>.dev</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#awards">Awards</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#" class="nav-resume" target="_blank">Resume ↗</a>
+</nav>
+
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <!-- Left: text -->
+    <div class="hero-text">
+      <p class="greeting">Hello, World 👋</p>
+      <h1>I'm <span class="hi">Van Tuan Kiet</span></h1>
+      <p class="subtitle">Backend Engineer</p>
+      <p>
+        Backend-focused Software Engineer passionate about building
+        <strong>scalable systems</strong> with Java&nbsp;Spring Boot.
+        I turn complex requirements into clean, reliable APIs — from
+        allocation engines to AI-driven learning platforms.
+      </p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn-solid">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          View Projects
+        </a>
+        <a href="#contact" class="btn-ghost">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Get in Touch
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: macOS window -->
+    <div class="mac-window">
+
+      <!-- Title bar -->
+      <div class="mac-titlebar">
+        <div class="dots">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+        </div>
+        <div class="mac-tabbar">
+          <div class="mac-tab on">Developer.java</div>
+          <div class="mac-tab">README.md</div>
+        </div>
+      </div>
+
+      <!-- Body: sidebar + editor -->
+      <div class="mac-body">
+
+        <!-- Sidebar icons -->
+        <div class="mac-sidebar">
+          <!-- Explorer -->
+          <div class="sb-icon on">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+            </svg>
+          </div>
+          <!-- Search -->
+          <div class="sb-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+          </div>
+          <!-- Git -->
+          <div class="sb-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.6 10.59L8.38 4.8l1.69 1.7c-.24.85.15 1.78.93 2.23v5.54c-.6.34-1 .99-1 1.73a2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.74-.4-1.39-1-1.73V9.41l2.07 2.09c-.07.15-.07.32-.07.5a2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2c-.2 0-.37.04-.53.1L13.93 7.5a2 2 0 0 0-1.93-2.5 2 2 0 0 0-1.84 1.22L8.38 4.44 2.12 10.7l.48.48z"/>
+            </svg>
+          </div>
+          <!-- Terminal -->
+          <div class="sb-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zm-3-7h-4v2h4v-2zm-8.83-1L6.76 9.59 8.17 8.17 11.83 12l-3.66 3.83-1.41-1.42L8.17 12z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Code editor -->
+        <div class="mac-editor" id="editor"></div>
+      </div>
+
+      <!-- Status bar -->
+      <div class="mac-statusbar">
+        <div class="status-left">
+          <span><span class="status-dot"></span></span>
+          <span>main</span>
+          <span>⎇ Git</span>
+        </div>
+        <div>Java · UTF-8 · Line 17</div>
+      </div>
+
+    </div><!-- end mac-window -->
+  </div>
+</section>
+
+
+<!-- ══════════════ ABOUT ══════════════ -->
+<section id="about">
+  <div class="container">
+    <div class="sec-head"><span class="sec-num">01.</span><h2 class="sec-title">About Me</h2></div>
+    <div class="sec-line"></div>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>
+          I'm a <strong>Software Engineering student at Sai Gon University (GPA: 3.65/4.0)</strong>,
+          graduating in 2026. I specialise in backend development — building APIs that are fast, reliable,
+          and maintainable.
+        </p>
+        <p>
+          Currently working full-time at <strong>Boostech Digital Transformation</strong>, where I've shipped
+          a concurrency-safe Allocation Engine, an edge-based notification system with sub-100ms delivery,
+          and optimised complex PostgreSQL schemas.
+        </p>
+        <p>
+          Outside of work I've published a conference paper on Reinforcement Learning for adaptive learning
+          paths, won a hackathon, and earned 6 Academic Excellence Scholarships.
+        </p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card glass">
+          <span class="stat-val">3.65</span>
+          <div class="stat-lbl">GPA / 4.0</div>
+        </div>
+        <div class="stat-card glass">
+          <span class="stat-val">&lt;100ms</span>
+          <div class="stat-lbl">Notification Delivery</div>
+        </div>
+        <div class="stat-card glass">
+          <span class="stat-val">22.5%</span>
+          <div class="stat-lbl">Score Boost (AI Project)</div>
+        </div>
+        <div class="stat-card glass">
+          <span class="stat-val">51%</span>
+          <div class="stat-lbl">Weak-Skill Reduction</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ SKILLS ══════════════ -->
+<section id="skills">
+  <div class="container">
+    <div class="sec-head"><span class="sec-num">02.</span><h2 class="sec-title">Technical Skills</h2></div>
+    <div class="sec-line"></div>
+    <div class="skills-grid">
+      <div class="skill-card glass reveal">
+        <h3>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Languages
+        </h3>
+        <div class="tags">
+          <span class="tag">Java</span>
+          <span class="tag">SQL</span>
+          <span class="tag">TypeScript</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">HTML/CSS</span>
+        </div>
+      </div>
+      <div class="skill-card glass reveal">
+        <h3>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Frameworks
+        </h3>
+        <div class="tags">
+          <span class="tag">Spring Boot</span>
+          <span class="tag">Spring Security</span>
+          <span class="tag">JPA/Hibernate</span>
+          <span class="tag">Next.js</span>
+          <span class="tag">React</span>
+          <span class="tag">FastAPI</span>
+        </div>
+      </div>
+      <div class="skill-card glass reveal">
+        <h3>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Databases
+        </h3>
+        <div class="tags">
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Redis</span>
+          <span class="tag">AWS S3</span>
+        </div>
+      </div>
+      <div class="skill-card glass reveal">
+        <h3>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          DevOps & Tools
+        </h3>
+        <div class="tags">
+          <span class="tag">Docker</span>
+          <span class="tag">Git</span>
+          <span class="tag">GitHub Actions</span>
+          <span class="tag">Cloudflare</span>
+          <span class="tag">Kong Gateway</span>
+          <span class="tag">RabbitMQ</span>
+        </div>
+      </div>
+      <div class="skill-card glass reveal">
+        <h3>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Architecture
+        </h3>
+        <div class="tags">
+          <span class="tag">REST API</span>
+          <span class="tag">Microservices</span>
+          <span class="tag">OOP & SOLID</span>
+          <span class="tag">CI/CD</span>
+          <span class="tag">LTI 1.3</span>
+        </div>
+      </div>
+      <div class="skill-card glass reveal">
+        <h3>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Languages (Human)
+        </h3>
+        <div class="tags">
+          <span class="tag">Vietnamese (Native)</span>
+          <span class="tag">English (TOEIC 765)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ EXPERIENCE ══════════════ -->
+<section id="experience">
+  <div class="container">
+    <div class="sec-head"><span class="sec-num">03.</span><h2 class="sec-title">Experience</h2></div>
+    <div class="sec-line"></div>
+    <div class="timeline">
+      <div class="t-item reveal-left">
+        <div class="t-dot"></div>
+        <div class="exp-card glass">
+          <div class="exp-top">
+            <div class="exp-role">Full-stack Developer — Full-time</div>
+            <div class="exp-when">Apr 2025 – Present</div>
+          </div>
+          <div class="exp-company">Boostech Digital Transformation · Ho Chi Minh City</div>
+          <ul class="exp-ul">
+            <li>Built scalable <strong>RESTful APIs</strong> with Spring Boot, Spring Data JPA, and Hibernate following SOLID/OOP principles and OpenAPI standards.</li>
+            <li>Implemented a high-concurrency <strong>Allocation Engine</strong> with Spring Transactions and row-level locking to guarantee stock reservation integrity.</li>
+            <li>Designed an edge-based <strong>In-app Notification</strong> system (Cloudflare Workers / SSE) with OpenFeign integration, achieving <strong>sub-100ms delivery</strong>.</li>
+            <li>Optimised <strong>PostgreSQL</strong> schemas and complex queries for Task Management modules, translating BA requirements into efficient ERD designs.</li>
+          </ul>
+          <div class="tech-strip">
+            <span class="tech-pill">Java</span>
+            <span class="tech-pill">Spring Boot</span>
+            <span class="tech-pill">Cloudflare Workers</span>
+            <span class="tech-pill">Next.js</span>
+            <span class="tech-pill">PostgreSQL</span>
+            <span class="tech-pill">OpenFeign</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ PROJECTS ══════════════ -->
+<section id="projects">
+  <div class="container">
+    <div class="sec-head"><span class="sec-num">04.</span><h2 class="sec-title">Projects</h2></div>
+    <div class="sec-line"></div>
+    <div class="proj-grid">
+
+      <!-- Project 1 -->
+      <div class="proj-card glass reveal">
+        <div class="proj-num">Project — 01</div>
+        <div class="proj-title">
+          High-Throughput Email Campaign System
+          <a href="https://github.com/kietsocola/email-campaign" class="proj-link" target="_blank">↗</a>
+        </div>
+        <p class="proj-desc">
+          Engineered a high-concurrency bulk-email pipeline. Uses <strong>Spring AMQP + RabbitMQ</strong> for async delivery,
+          <strong>Dead Letter Queues</strong> and <strong>Exponential Backoff</strong> for resilience, and
+          <strong>Spring Security / JWT</strong> for auth. Atomic updates via <strong>@Transactional</strong> ensure idempotency.
+        </p>
+        <div class="tags">
+          <span class="tag">Spring Boot</span>
+          <span class="tag">RabbitMQ</span>
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">JWT</span>
+        </div>
+        <div class="tech-strip" style="margin-top:.75rem">
+          <span class="tech-pill">Jan – Feb 2026</span>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="proj-card glass reveal">
+        <div class="proj-num">Project — 02</div>
+        <div class="proj-title">
+          AI-Driven STEM Learning Ecosystem
+          <a href="https://github.com/kltn-moolde/moodle-adaptive-learning-plugin" class="proj-link" target="_blank">↗</a>
+        </div>
+        <p class="proj-desc">
+          Microservices platform with <strong>Kong API Gateway</strong> and <strong>GitHub Actions CI/CD</strong>.
+          Integrates with Moodle via <strong>LTI 1.3</strong>. Core: a <strong>Q-Learning engine with SHAP</strong>
+          explainability — achieving a <strong>22.5% score boost</strong> and <strong>51% reduction</strong> in weak skills.
+          Presented at FJCAI National Conference.
+        </p>
+        <div class="tags">
+          <span class="tag">Spring Boot</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">Kong</span>
+          <span class="tag">Docker</span>
+          <span class="tag">Q-Learning</span>
+          <span class="tag">SHAP</span>
+        </div>
+        <div class="tech-strip" style="margin-top:.75rem">
+          <span class="tech-pill">Jun – Dec 2025</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ AWARDS ══════════════ -->
+<section id="awards">
+  <div class="container">
+    <div class="sec-head"><span class="sec-num">05.</span><h2 class="sec-title">Honors &amp; Awards</h2></div>
+    <div class="sec-line"></div>
+    <div class="awards-grid">
+      <div class="award-card glass reveal">
+        <div class="award-icon">🎤</div>
+        <div>
+          <div class="award-title">Conference Presenter — FJCAI (National)</div>
+          <div class="award-desc">Paper: "Adaptive STEM Learning Pathway via Reinforcement Learning"</div>
+        </div>
+      </div>
+      <div class="award-card glass reveal">
+        <div class="award-icon">🥈</div>
+        <div>
+          <div class="award-title">2nd Place — Hackathon</div>
+          <div class="award-desc">AI applications in digital transformation for local tourism</div>
+        </div>
+      </div>
+      <div class="award-card glass reveal">
+        <div class="award-icon">📚</div>
+        <div>
+          <div class="award-title">6× Academic Excellence Scholarship</div>
+          <div class="award-desc">Sai Gon University · 2022–2026</div>
+        </div>
+      </div>
+      <div class="award-card glass reveal">
+        <div class="award-icon">🏆</div>
+        <div>
+          <div class="award-title">3× Outstanding Student — Binh Dinh Province</div>
+          <div class="award-desc">Provincial-level recognition for academic performance</div>
+        </div>
+      </div>
+      <div class="award-card glass reveal">
+        <div class="award-icon">💡</div>
+        <div>
+          <div class="award-title">Consolation Prize — BeZstartup</div>
+          <div class="award-desc">Personalized book recommendation platform</div>
+        </div>
+      </div>
+      <div class="award-card glass reveal">
+        <div class="award-icon">🌐</div>
+        <div>
+          <div class="award-title">TOEIC — 765 L&amp;R · 320/400 S&amp;W</div>
+          <div class="award-desc">Professional working proficiency in English</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ CONTACT ══════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="sec-head" style="justify-content:center"><span class="sec-num">06.</span><h2 class="sec-title">Get in Touch</h2></div>
+    <div class="sec-line"></div>
+    <div class="contact-box glass reveal">
+      <p>
+        I'm currently open to full-time Backend / Full-stack roles or interesting collaborations.
+        If you have an opportunity or just want to chat about tech, my inbox is always open.
+      </p>
+      <a href="mailto:kietdev27@gmail.com" class="btn-solid" style="display:inline-flex">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Say Hello
+      </a>
+      <div class="socials">
+        <a href="https://linkedin.com/in/kietdev27" class="social-btn" target="_blank">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          linkedin.com/in/kietdev27
+        </a>
+        <a href="https://github.com/kietsocola" class="social-btn" target="_blank">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          github.com/kietsocola
+        </a>
+        <a href="tel:+84976077913" class="social-btn">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          (+84) 976 077 913
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  Designed &amp; built by <span>Van Tuan Kiet</span> &nbsp;·&nbsp; 2026
+</footer>
+
+
+<script>
+/* ──────────────────────────────────────────────
+   CODE TYPING ANIMATION (Java / Spring Boot)
+────────────────────────────────────────────── */
+const lines = [
+  { n:1,  h: `<span class="cm">// dev/kiet/Developer.java</span>` },
+  { n:2,  h: `` },
+  { n:3,  h: `<span class="kw">package</span> <span class="va">dev.kiet</span><span class="op">;</span>` },
+  { n:4,  h: `` },
+  { n:5,  h: `<span class="ann">@Component</span>` },
+  { n:6,  h: `<span class="kw">public class</span> <span class="tp">Developer</span> <span class="op">{</span>` },
+  { n:7,  h: `` },
+  { n:8,  h: `&nbsp;&nbsp;<span class="kw">private final</span> <span class="tp">String</span> <span class="va">name</span>  <span class="op">=</span> <span class="str">"Van Tuan Kiet"</span><span class="op">;</span>` },
+  { n:9,  h: `&nbsp;&nbsp;<span class="kw">private final</span> <span class="tp">String</span> <span class="va">role</span>  <span class="op">=</span> <span class="str">"Backend Engineer"</span><span class="op">;</span>` },
+  { n:10, h: `&nbsp;&nbsp;<span class="kw">private final</span> <span class="tp">List</span><span class="op">&lt;</span><span class="tp">String</span><span class="op">&gt;</span> <span class="va">stack</span> <span class="op">=</span> <span class="tp">List</span><span class="op">.</span><span class="fn">of</span><span class="op">(</span>` },
+  { n:11, h: `&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Java"</span><span class="op">,</span> <span class="str">"Spring Boot"</span><span class="op">,</span> <span class="str">"PostgreSQL"</span>` },
+  { n:12, h: `&nbsp;&nbsp;<span class="op">);</span>` },
+  { n:13, h: `` },
+  { n:14, h: `&nbsp;&nbsp;<span class="ann">@Override</span>` },
+  { n:15, h: `&nbsp;&nbsp;<span class="kw">public</span> <span class="tp">Response</span> <span class="fn">solve</span><span class="op">(</span><span class="tp">Problem</span> <span class="va">p</span><span class="op">) {</span>` },
+  { n:16, h: `&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="va">service</span><span class="op">.</span><span class="fn">build</span><span class="op">(</span><span class="va">p</span><span class="op">,</span> <span class="va">stack</span><span class="op">);</span>` },
+  { n:17, h: `&nbsp;&nbsp;<span class="op">}</span>` },
+  { n:18, h: `<span class="op">}</span>` },
+  { n:19, h: `` },
+  { n:20, h: `<span class="cm">// 🔵 @ Boostech &nbsp;·&nbsp; Open to opportunities ✓</span>` },
+];
+
+const editor = document.getElementById('editor');
+let idx = 0;
+
+function appendLine() {
+  // remove cursor from last line
+  const prev = editor.querySelector('.cursor');
+  if (prev) prev.remove();
+
+  if (idx >= lines.length) return;
+  const { n, h } = lines[idx];
+
+  const row = document.createElement('div');
+  row.className = 'code-line';
+  row.innerHTML = `<span class="ln">${n}</span><span class="cc">${h}<span class="cursor"></span></span>`;
+  editor.appendChild(row);
+  idx++;
+
+  const delay = h === '' ? 60 : 120 + Math.random() * 80;
+  setTimeout(appendLine, delay);
+}
+
+setTimeout(appendLine, 700);
+
+
+/* ──────────────────────────────────────────────
+   SCROLL REVEAL — IntersectionObserver
+────────────────────────────────────────────── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal, .reveal-left').forEach((el, i) => {
+  el.style.transitionDelay = `${(i % 4) * 0.09}s`;
+  io.observe(el);
+});
+
+
+/* ──────────────────────────────────────────────
+   NAV: scroll shadow + active section highlight
+────────────────────────────────────────────── */
+const navEl = document.getElementById('nav');
+const sections = [...document.querySelectorAll('section[id]')];
+const navAs = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  navEl.classList.toggle('scrolled', window.scrollY > 40);
+
+  let cur = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 160) cur = s.id;
+  });
+  navAs.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === `#${cur}`);
+  });
+}, { passive: true });
+</script>
+
 </body>
 </html>
